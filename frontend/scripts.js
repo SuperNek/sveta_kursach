@@ -15,27 +15,54 @@ document.addEventListener('DOMContentLoaded', () => {
         const response = await fetch('/api/requests');
         const requests = await response.json();
     
-        console.log('Ответ от API:', requests); // Лог для проверки ответа
+        console.log('Ответ от API:', requests); // Отладочный вывод
     
         if (!Array.isArray(requests)) {
           throw new Error('API не вернул массив заявок');
         }
     
         if (requests.length === 0) {
-          requestsTable.innerHTML = '<tr><td colspan="8">Нет доступных заявок</td></tr>';
+          requestsTable.innerHTML = '<tr><td colspan="7">Нет доступных заявок</td></tr>';
           return;
         }
     
-        // Заполнение таблицы, если есть записи
+        // Функция для преобразования даты
+        const formatDate = (dateString) => {
+          const date = new Date(dateString);
+          const day = String(date.getDate()).padStart(2, '0');
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const year = date.getFullYear();
+          return `${day}.${month}.${year}`;
+        };
+    
+        // Функция для перевода приоритета
+        const translatePriority = (priority) => {
+          const priorities = {
+            low: 'низкий',
+            medium: 'средний',
+            high: 'высокий',
+          };
+          return priorities[priority] || priority;
+        };
+    
+        // Функция для перевода статуса
+        const translateStatus = (status) => {
+          const statuses = {
+            new: 'создана',
+            resolved: 'решена',
+          };
+          return statuses[status] || status;
+        };
+    
+        // Заполнение таблицы
         requestsTable.innerHTML = requests.map(request => `
           <tr>
-            <td>${request.id}</td>
             <td>${request.description}</td>
-            <td>${request.status}</td>
+            <td>${translateStatus(request.status)}</td>
             <td>${request.initiator}</td>
             <td>${request.executor || '-'}</td>
-            <td>${request.priority}</td>
-            <td>${request.dueDate || '-'}</td>
+            <td>${translatePriority(request.priority)}</td>
+            <td>${request.dueDate ? formatDate(request.dueDate) : '-'}</td>
             <td>
               <button class="edit" data-id="${request.id}">Редактировать</button>
               <button class="delete" data-id="${request.id}">Удалить</button>

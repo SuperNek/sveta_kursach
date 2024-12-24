@@ -15,7 +15,6 @@
     <table>
       <thead>
         <tr>
-          <th>ID</th>
           <th>Описание</th>
           <th>Статус</th>
           <th>Инициатор</th>
@@ -30,14 +29,27 @@
   </main>
 
   <!-- Модальное окно для создания/редактирования заявки -->
-  <div id="modal" class="modal hidden">
+  <<div id="modal" class="hidden modal">
     <div class="modal-content">
-      <h2 id="modal-title">Создание заявки</h2>
+      <h2 id="modal-title"></h2>
       <form id="request-form">
         <label>
           Описание:
           <textarea id="description" name="description" required></textarea>
         </label>
+  
+        <div id="edit-only-fields" class="hidden">
+          <label>
+            Исполнитель:
+            <input type="text" id="executor" name="executor" />
+          </label>
+  
+          <label>
+            Срок выполнения:
+            <input type="date" id="dueDate" name="dueDate" />
+          </label>
+        </div>
+  
         <label>
           Приоритет:
           <select id="priority" name="priority" required>
@@ -46,27 +58,18 @@
             <option value="high">Высокий</option>
           </select>
         </label>
+  
         <label>
           Инициатор:
           <input type="text" id="initiator" name="initiator" required />
         </label>
-        <label>
-          Исполнитель:
-          <input type="text" id="executor" name="executor" />
-        </label>
-        <label>
-          Срок выполнения:
-          <input type="date" id="dueDate" name="dueDate" />
-        </label>
-        <label>
-          Комментарии:
-          <textarea id="comments" name="comments"></textarea>
-        </label>
+  
         <button type="submit">Сохранить</button>
       </form>
       <button id="close-modal">Закрыть</button>
     </div>
   </div>
+  
   
 
   <script src="scripts.js"></script>
