@@ -29,7 +29,7 @@
   </main>
 
   <!-- Модальное окно для создания/редактирования заявки -->
-  <<div id="modal" class="hidden modal">
+  <div id="modal" class="hidden modal">
     <div class="modal-content">
       <h2 id="modal-title"></h2>
       <form id="request-form">
@@ -43,10 +43,18 @@
             Исполнитель:
             <input type="text" id="executor" name="executor" />
           </label>
-  
+        
           <label>
             Срок выполнения:
             <input type="date" id="dueDate" name="dueDate" />
+          </label>
+
+          <label>
+            Статус:
+            <select id="status" name="status">
+              <option value="new">Создана</option>
+              <option value="resolved">Решена</option>
+            </select>
           </label>
         </div>
   
@@ -63,7 +71,12 @@
           Инициатор:
           <input type="text" id="initiator" name="initiator" required />
         </label>
-  
+
+        <label for="attachment">
+          Прикрепить файл:
+          <input type="file" id="attachment" name="attachment" />
+        </label>
+        
         <button type="submit">Сохранить</button>
       </form>
       <button id="close-modal">Закрыть</button>

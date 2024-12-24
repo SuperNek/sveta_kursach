@@ -9,31 +9,31 @@ const router = express.Router();
 
 // Настройка Multer
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      cb(null, `${uniqueSuffix}-${file.originalname}`);
-    },
-  });
-  
-  // Фильтрация по типу файлов
-  const fileFilter = (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
-    if (!allowedTypes.includes(file.mimetype)) {
-      cb(new Error('Only .jpg, .png, and .pdf files are allowed!'));
-    } else {
-      cb(null, true);
-    }
-  };
-  
-  // Создаём Multer middleware
-  const upload = multer({
-    storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // Ограничение размера файла: 5MB
-    fileFilter,
-  });
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // Папка для сохранения файлов
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, `${uniqueSuffix}-${file.originalname}`);
+  },
+});
+
+// Фильтрация по типу файлов
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+  if (!allowedTypes.includes(file.mimetype)) {
+    cb(new Error('Only .jpg, .png, and .pdf files are allowed!'));
+  } else {
+    cb(null, true);
+  }
+};
+
+// Создаём Multer middleware
+const upload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // Ограничение размера файла: 10MB
+  fileFilter,
+});
 
 // Получить все заявки
 router.get('/', async (req, res) => {
@@ -42,7 +42,6 @@ router.get('/', async (req, res) => {
       include: [{ model: Attachment, as: 'attachments' }],
     });
 
-    // Всегда возвращаем массив, даже если он пустой
     res.json(requests || []);
   } catch (error) {
     console.error('Ошибка API /api/requests:', error.message);
@@ -50,9 +49,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-
 // Создать новую заявку с вложениями
-router.post('/', upload.array('attachments', 10), async (req, res) => {
+router.post('/', upload.single('attachment'), async (req, res) => {
   const { description, priority, initiator, executor, dueDate, comments } = req.body;
 
   if (!description || !priority || !initiator) {
@@ -70,13 +68,12 @@ router.post('/', upload.array('attachments', 10), async (req, res) => {
       comments,
     });
 
-    // Сохраняем вложения
-    if (req.files) {
-      const attachments = req.files.map((file) => ({
+    // Сохраняем вложение
+    if (req.file) {
+      await Attachment.create({
         requestId: request.id,
-        filePath: file.path,
-      }));
-      await Attachment.bulkCreate(attachments);
+        filePath: req.file.path,
+      });
     }
 
     res.status(201).json(request);
@@ -85,20 +82,17 @@ router.post('/', upload.array('attachments', 10), async (req, res) => {
   }
 });
 
+// Удалить заявку
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
 
   try {
-    // Находим заявку по ID
     const request = await Request.findByPk(id);
-
     if (!request) {
       return res.status(404).json({ error: 'Request not found' });
     }
 
-    // Удаляем связанные вложения из базы данных
     const attachments = await Attachment.findAll({ where: { requestId: id } });
-
     for (const attachment of attachments) {
       const filePath = path.resolve(attachment.filePath);
       try {
@@ -110,9 +104,7 @@ router.delete('/:id', async (req, res) => {
       }
       await attachment.destroy();
     }
-    
 
-    // Удаляем заявку
     await request.destroy();
 
     res.json({ message: 'Request and associated attachments deleted successfully' });
@@ -121,7 +113,7 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// Редактирование заявки
+// Редактировать заявку
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
   const { description, status, priority, executor, dueDate, comments } = req.body;
@@ -132,7 +124,6 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Request not found' });
     }
 
-    // Обновляем заявку
     await request.update({
       description,
       status,
@@ -148,14 +139,13 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// Получить заявку по ID
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
 
   try {
     const request = await Request.findByPk(id, {
-      include: [
-        { model: Attachment, as: 'attachments' }, // Если есть вложения
-      ],
+      include: [{ model: Attachment, as: 'attachments' }],
     });
 
     if (!request) {
