@@ -50,7 +50,7 @@ router.get('/', async (req, res) => {
 });
 
 // Создать новую заявку с вложениями
-router.post('/', upload.single('attachment'), async (req, res) => {
+router.post('/', upload.array('attachment'), async (req, res) => {
   const { description, priority, initiator, executor, dueDate, comments } = req.body;
 
   if (!description || !priority || !initiator) {
