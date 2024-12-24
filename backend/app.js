@@ -1,4 +1,5 @@
 import express from 'express';
+import sequelize from './config/database.js';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import bodyParser from 'body-parser';
@@ -24,6 +25,12 @@ app.use(express.static(frontendPath));
 // Маршрут для отдачи главной страницы
 app.get('/', (req, res) => {
   res.sendFile(path.join(frontendPath, 'index.html'));
+});
+
+sequelize.sync({ force: true }).then(() => {
+  console.log('База данных синхронизирована.');
+}).catch((error) => {
+  console.error('Ошибка синхронизации базы данных:', error.message);
 });
 
 // Запуск сервера

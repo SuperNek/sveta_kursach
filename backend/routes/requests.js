@@ -41,11 +41,15 @@ router.get('/', async (req, res) => {
     const requests = await Request.findAll({
       include: [{ model: Attachment, as: 'attachments' }],
     });
-    res.json(requests);
+
+    // Всегда возвращаем массив, даже если он пустой
+    res.json(requests || []);
   } catch (error) {
+    console.error('Ошибка API /api/requests:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // Создать новую заявку с вложениями
 router.post('/', upload.array('attachments', 10), async (req, res) => {

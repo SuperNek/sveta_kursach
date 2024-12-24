@@ -12,10 +12,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // Функция для получения заявок
     const fetchRequests = async () => {
       try {
-        const response = await fetch('/api/requests'); // URL для вашего backend
+        const response = await fetch('/api/requests');
         const requests = await response.json();
-  
-        // Заполняем таблицу заявок
+    
+        console.log('Ответ от API:', requests); // Лог для проверки ответа
+    
+        if (!Array.isArray(requests)) {
+          throw new Error('API не вернул массив заявок');
+        }
+    
+        if (requests.length === 0) {
+          requestsTable.innerHTML = '<tr><td colspan="8">Нет доступных заявок</td></tr>';
+          return;
+        }
+    
+        // Заполнение таблицы, если есть записи
         requestsTable.innerHTML = requests.map(request => `
           <tr>
             <td>${request.id}</td>
@@ -32,9 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
           </tr>
         `).join('');
       } catch (error) {
-        console.error('Ошибка при получении заявок:', error);
+        console.error('Ошибка при получении заявок:', error.message);
       }
     };
+    
   
     // Открытие модального окна
     const showModal = (isEdit = false, data = {}) => {

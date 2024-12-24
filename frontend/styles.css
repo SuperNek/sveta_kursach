@@ -33,10 +33,6 @@ body {
     cursor: pointer;
   }
   
-  .hidden {
-    display: none;
-  }
-  
   /* Модальное окно */
 .modal {
     position: fixed;
@@ -113,3 +109,6 @@ body {
     width: 40%;
   }
   
+  .hidden{
+    display: none;
+  }
