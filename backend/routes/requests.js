@@ -68,7 +68,7 @@ router.post('/', upload.single('attachment'), async (req, res) => {
       comments,
     });
 
-    // Сохраняем вложение
+    // Сохраняем файл как вложение
     if (req.file) {
       await Attachment.create({
         requestId: request.id,
@@ -81,6 +81,7 @@ router.post('/', upload.single('attachment'), async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // Удалить заявку
 router.delete('/:id', async (req, res) => {

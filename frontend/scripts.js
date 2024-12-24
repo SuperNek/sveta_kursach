@@ -103,9 +103,10 @@ document.addEventListener('DOMContentLoaded', () => {
   requestForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const formData = new FormData(requestForm); // Используем FormData для отправки файлов
-      if (attachmentInput.files[0]) {
-          formData.append('attachment', attachmentInput.files[0]);
+      const formData = new FormData(requestForm);
+      const fileInput = document.getElementById('attachment');
+      if (fileInput.files[0]) {
+        formData.append('attachment', fileInput.files[0]);
       }
 
       try {
