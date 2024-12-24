@@ -43,7 +43,7 @@ const Request = sequelize.define('Request', {
   },
 });
 
-// Связь между заявками и вложениями
+// Устанавливаем связи
 Request.hasMany(Attachment, { foreignKey: 'requestId', as: 'attachments' });
 Attachment.belongsTo(Request, { foreignKey: 'requestId', as: 'request' });
 

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Управление заявками</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Система управления заявками</h1>
+    <button id="create-request-btn">Создать заявку</button>
+  </header>
+  <main>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Описание</th>
+          <th>Статус</th>
+          <th>Инициатор</th>
+          <th>Исполнитель</th>
+          <th>Приоритет</th>
+          <th>Срок выполнения</th>
+          <th>Действия</th>
+        </tr>
+      </thead>
+      <tbody id="requests-table"></tbody>
+    </table>
+  </main>
+
+  <!-- Модальное окно для создания/редактирования заявки -->
+  <div id="modal" class="hidden modal">
+    <div class="modal-content">
+      <h2 id="modal-title">Создание заявки</h2>
+      <form id="request-form">
+        <label>
+          Описание:
+          <textarea id="description" name="description" required></textarea>
+        </label>
+        <label>
+          Приоритет:
+          <select id="priority" name="priority" required>
+            <option value="low">Низкий</option>
+            <option value="medium">Средний</option>
+            <option value="high">Высокий</option>
+          </select>
+        </label>
+        <label>
+          Инициатор:
+          <input type="text" id="initiator" name="initiator" required />
+        </label>
+        <label>
+          Исполнитель:
+          <input type="text" id="executor" name="executor" />
+        </label>
+        <label>
+          Срок выполнения:
+          <input type="date" id="dueDate" name="dueDate" />
+        </label>
+        <label>
+          Комментарии:
+          <textarea id="comments" name="comments"></textarea>
+        </label>
+        <button type="submit">Сохранить</button>
+      </form>
+      <button id="close-modal">Закрыть</button>
+    </div>
+  </div>
+  
+
+  <script src="scripts.js"></script>
+</body>
+</html>

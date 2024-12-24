@@ -1,29 +1,29 @@
 import express from 'express';
-import bodyParser from 'body-parser';
 import path from 'path';
-import requestsRoutes from './routes/requests.js';
-import attachmentsRoutes from './routes/attachments.js';
-import sequelize from './config/database.js';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import routes from './routes/requests.js';
 
 const app = express();
+
+// Middleware
+app.use(cors());
 app.use(bodyParser.json());
 
-// Маршруты API
-app.use('/api/requests', requestsRoutes);
-app.use('/api/attachments', attachmentsRoutes);
+// API маршруты
+app.use('/api/requests', routes);
 
-// Папка для загруженных файлов
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Обслуживание статических файлов (frontend)
+const frontendPath = path.join(__dirname, '../frontend');
+app.use(express.static(frontendPath));
 
-// Синхронизация базы данных
-const startServer = async () => {
-  try {
-    await sequelize.sync({ force: true }); // force: true для тестов, отключите в production
-    console.log('Database synced.');
-    app.listen(3000, () => console.log('Server running on http://localhost:3000'));
-  } catch (error) {
-    console.error('Error starting server:', error);
-  }
-};
+// Маршрут для отдачи главной страницы
+app.get('/', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
 
-startServer();
+// Запуск сервера
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Сервер запущен на http://localhost:${PORT}`);
+});
