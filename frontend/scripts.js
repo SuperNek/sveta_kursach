@@ -82,41 +82,63 @@ document.addEventListener('DOMContentLoaded', () => {
     editMode = isEdit;
     editId = data.id || null;
   
-    // Проверки на наличие данных перед заполнением
-    if (requestForm.description) requestForm.description.value = data.description || '';
-    if (requestForm.priority) requestForm.priority.value = data.priority || 'low';
-    if (requestForm.initiator) requestForm.initiator.value = data.initiator || '';
-    if (requestForm.executor) requestForm.executor.value = data.executor || '';
-    if (requestForm.dueDate) requestForm.dueDate.value = data.dueDate || '';
-    if (requestForm.comments) requestForm.comments.value = data.comments || '';
-    if (requestForm.status) requestForm.status.value = data.status || 'new'; // Статус по умолчанию
+    // Показываем поля для редактирования только в режиме редактирования
+    const editOnlyFields = document.getElementById('edit-only-fields');
+    if (isEdit) {
+      editOnlyFields.classList.remove('hidden'); // Показываем поля для редактирования
+      requestForm.description.value = data.description || '';
+      requestForm.priority.value = data.priority || 'low';
+      requestForm.initiator.value = data.initiator || '';
+      requestForm.executor.value = data.executor || '';
+      requestForm.dueDate.value = data.dueDate || '';
+      requestForm.status.value = data.status || 'new';
+    } else {
+      editOnlyFields.classList.add('hidden'); // Скрываем поля для создания
+      requestForm.reset();
+    }
   
     modal.classList.remove('hidden');
   };
+  
 
   // Закрытие модального окна
   closeModal.addEventListener('click', () => modal.classList.add('hidden'));
 
   // Создание или обновление заявки
   requestForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const formData = new FormData(requestForm);
-
-      try {
-          const method = editMode ? 'PUT' : 'POST';
-          const url = editMode ? `/api/requests/${editId}` : `/api/requests`;
-
-          await fetch(url, {
-              method,
-              body: formData, // Передаём FormData
-          });
-
-          modal.classList.add('hidden');
-          fetchRequests();
-      } catch (error) {
-          console.error('Ошибка при сохранении заявки:', error);
+    e.preventDefault();
+  
+    const formData = new FormData(requestForm);
+  
+    try {
+      const method = editMode ? 'PUT' : 'POST';
+      const url = editMode ? `/api/requests/${editId}` : '/api/requests';
+  
+      const payload = {
+        description: formData.get('description'),
+        priority: formData.get('priority'),
+        initiator: formData.get('initiator'),
+      };
+  
+      if (editMode) {
+        payload.executor = formData.get('executor') || null;
+        payload.dueDate = formData.get('dueDate') || null;
+        payload.status = formData.get('status') || 'new';
       }
+  
+      await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload), // Отправляем JSON-данные
+      });
+  
+      modal.classList.add('hidden');
+      fetchRequests(); // Обновляем список заявок
+    } catch (error) {
+      console.error('Ошибка при сохранении заявки:', error);
+    }
   });
 
   // Обработка кнопок редактирования, удаления
