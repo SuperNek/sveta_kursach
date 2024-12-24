@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const modal = document.getElementById('modal');
   const modalTitle = document.getElementById('modal-title');
   const requestForm = document.getElementById('request-form');
-  const attachmentInput = document.getElementById('attachment'); // Новое поле для загрузки файла
   const closeModal = document.getElementById('close-modal');
   const createRequestBtn = document.getElementById('create-request-btn');
 
@@ -57,20 +56,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
           // Заполнение таблицы
           requestsTable.innerHTML = requests.map(request => `
-              <tr>
-                  <td>${request.description}</td>
-                  <td>${translateStatus(request.status)}</td>
-                  <td>${request.initiator}</td>
-                  <td>${request.executor || '-'}</td>
-                  <td>${translatePriority(request.priority)}</td>
-                  <td>${request.dueDate ? formatDate(request.dueDate) : '-'}</td>
-                  <td>
-                      <button class="edit" data-id="${request.id}">Редактировать</button>
-                      <button class="delete" data-id="${request.id}">Удалить</button>
-                      ${request.attachment ? `<button class="view-file" data-file="${request.attachment}">Посмотреть файл</button>` : ''}
-                  </td>
-              </tr>
+            <tr>
+              <td>${request.description}</td>
+              <td>${translateStatus(request.status)}</td>
+              <td>${request.initiator}</td>
+              <td>${request.executor || '-'}</td>
+              <td>${translatePriority(request.priority)}</td>
+              <td>${request.dueDate ? formatDate(request.dueDate) : '-'}</td>
+              <td>
+                <button class="edit" data-id="${request.id}">Редактировать</button>
+                <button class="delete" data-id="${request.id}">Удалить</button>
+              </td>
+            </tr>
           `).join('');
+          
+          
       } catch (error) {
           console.error('Ошибка при получении заявок:', error.message);
       }
@@ -78,22 +78,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Открытие модального окна
   const showModal = (isEdit = false, data = {}) => {
-      modalTitle.textContent = isEdit ? 'Редактирование заявки' : 'Создание заявки';
-      editMode = isEdit;
-      editId = data.id || null;
-
-      if (isEdit) {
-          requestForm.description.value = data.description;
-          requestForm.priority.value = data.priority;
-          requestForm.initiator.value = data.initiator;
-          requestForm.executor.value = data.executor || '';
-          requestForm.dueDate.value = data.dueDate || '';
-          requestForm.comments.value = data.comments || '';
-      } else {
-          requestForm.reset();
-      }
-
-      modal.classList.remove('hidden');
+    modalTitle.textContent = isEdit ? 'Редактирование заявки' : 'Создание заявки';
+    editMode = isEdit;
+    editId = data.id || null;
+  
+    // Проверки на наличие данных перед заполнением
+    if (requestForm.description) requestForm.description.value = data.description || '';
+    if (requestForm.priority) requestForm.priority.value = data.priority || 'low';
+    if (requestForm.initiator) requestForm.initiator.value = data.initiator || '';
+    if (requestForm.executor) requestForm.executor.value = data.executor || '';
+    if (requestForm.dueDate) requestForm.dueDate.value = data.dueDate || '';
+    if (requestForm.comments) requestForm.comments.value = data.comments || '';
+    if (requestForm.status) requestForm.status.value = data.status || 'new'; // Статус по умолчанию
+  
+    modal.classList.remove('hidden');
   };
 
   // Закрытие модального окна
@@ -104,10 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
 
       const formData = new FormData(requestForm);
-      const fileInput = document.getElementById('attachment');
-      if (fileInput.files[0]) {
-        formData.append('attachment', fileInput.files[0]);
-      }
 
       try {
           const method = editMode ? 'PUT' : 'POST';
@@ -125,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   });
 
-  // Обработка кнопок редактирования, удаления и просмотра файлов
+  // Обработка кнопок редактирования, удаления
   requestsTable.addEventListener('click', async (e) => {
       if (e.target.classList.contains('edit')) {
           const id = e.target.dataset.id;
@@ -148,11 +142,6 @@ document.addEventListener('DOMContentLoaded', () => {
           } catch (error) {
               console.error('Ошибка при удалении заявки:', error);
           }
-      }
-
-      if (e.target.classList.contains('view-file')) {
-          const filePath = e.target.dataset.file;
-          window.open(`/uploads/${filePath}`, '_blank'); // Открываем файл в новой вкладке
       }
   });
 
