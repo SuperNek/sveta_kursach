@@ -1,10 +1,14 @@
 import express from 'express';
+import { fileURLToPath } from 'url';
 import path from 'path';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import routes from './routes/requests.js';
 
 const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Middleware
 app.use(cors());
